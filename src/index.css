@@ -239,6 +239,8 @@ All colors MUST be HSL.
   animation: rotate var(--spark) linear infinite both;
 }
 
+
+
 .spark:after {
   content: "";
   position: absolute;
@@ -527,6 +529,12 @@ All colors MUST be HSL.
   }
   100% {
     filter: hue-rotate(0deg);
+  }
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
   }
 }
 

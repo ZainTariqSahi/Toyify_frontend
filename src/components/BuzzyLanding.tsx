@@ -74,7 +74,7 @@ export const BuzzyLanding: React.FC<BuzzyLandingProps> = ({
   console.log("Zain here is user", user);
 
   // Restore pending order after login (non-PII data only for security)
-  x
+  x;
   // const [direction, setDirection] = useState<"forward" | "backward">("forward");
   const [file, setFile] = useState<File | null>(null);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
@@ -98,7 +98,7 @@ export const BuzzyLanding: React.FC<BuzzyLandingProps> = ({
   const [tempDescription, setTempDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [generatedConceptUrl, setGeneratedConceptUrl] = useState<string | null>(
-    null
+    null,
   );
   const [isGeneratingConcept, setIsGeneratingConcept] = useState(false);
   const [generationError, setGenerationError] = useState<string | null>(null);
@@ -122,7 +122,7 @@ export const BuzzyLanding: React.FC<BuzzyLandingProps> = ({
   // Unified animation dispatcher for 3D model
   const dispatchNormalizedAnimation = (
     container: HTMLDivElement,
-    direction: 1 | -1
+    direction: 1 | -1,
   ) => {
     const deltaPerFrame = (NORMALIZED_DELTA * direction) / FRAMES;
     let frameCount = 0;
@@ -141,7 +141,6 @@ export const BuzzyLanding: React.FC<BuzzyLandingProps> = ({
     };
     requestAnimationFrame(animateFrame);
   };
- 
 
   // Validation schema for order form
   const orderFormSchema = z.object({
@@ -152,7 +151,7 @@ export const BuzzyLanding: React.FC<BuzzyLandingProps> = ({
       .max(100, "Name must be less than 100 characters")
       .regex(
         /^[a-zA-Z\s'-]+$/,
-        "Name can only contain letters, spaces, hyphens, and apostrophes"
+        "Name can only contain letters, spaces, hyphens, and apostrophes",
       ),
     customerEmail: z
       .string()
@@ -164,7 +163,7 @@ export const BuzzyLanding: React.FC<BuzzyLandingProps> = ({
       .trim()
       .regex(
         /^\+?[1-9]\d{1,14}$/,
-        "Please enter a valid phone number (e.g., +44123456789)"
+        "Please enter a valid phone number (e.g., +44123456789)",
       )
       .optional()
       .or(z.literal("")),
@@ -189,61 +188,69 @@ export const BuzzyLanding: React.FC<BuzzyLandingProps> = ({
     // Total price before shipping
     return pricePerToy * qty;
   };
-// Inside BuzzyLanding.tsx or wherever handleSubmit is defined
-// Inside BuzzyLanding.tsx or wherever handleSubmit is defined
-const handleSubmit = async () => {
-  if (!user) {
-    // user must be logged in before submitting
-    navigate("/auth?redirect=order"); // or save step in query
-    return;
-  }
+  // Inside BuzzyLanding.tsx or wherever handleSubmit is defined
+  // Inside BuzzyLanding.tsx or wherever handleSubmit is defined
+  const handleSubmit = async () => {
+    if (!user) {
+      // user must be logged in before submitting
+      navigate("/auth?redirect=order"); // or save step in query
+      return;
+    }
 
-  if (!file || !selectedImageVersion || !size || !quantity) {
-    toast({ title: "Missing info", description: "Please fill all required fields", variant: "destructive" });
-    return;
-  }
+    if (!file || !selectedImageVersion || !size || !quantity) {
+      toast({
+        title: "Missing info",
+        description: "Please fill all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
 
-  setIsSubmitting(true);
+    setIsSubmitting(true);
 
-  try {
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/orders`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-      body: JSON.stringify({
-        fileName: file.name,
-        imageVersion: selectedImageVersion,
-        size: size[0],
-        quantity,
-        description: toyStory || "", // optional
-        customerEmail
-      }),
-    });
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/orders`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({
+          fileName: file.name,
+          imageVersion: selectedImageVersion,
+          size: size[0],
+          quantity,
+          description: toyStory || "", // optional
+          customerEmail,
+        }),
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (!res.ok) throw new Error(data.message || "Order submission failed");
+      if (!res.ok) throw new Error(data.message || "Order submission failed");
 
-    // ✅ Use backend-generated order ID if needed
-    const orderId = data.order._id;
+      // ✅ Use backend-generated order ID if needed
+      const orderId = data.order._id;
 
-    toast({ title: "Order submitted!", description: "Check your email for confirmation." });
+      toast({
+        title: "Order submitted!",
+        description: "Check your email for confirmation.",
+      });
 
-    // Move to confirmation step
-    // setStep(7); // assuming step 7 is order confirmation
+      // Move to confirmation step
+      // setStep(7); // assuming step 7 is order confirmation
 
-    // If you want to redirect in future: navigate(`/orders/${orderId}`);
-  } catch (err: any) {
-    toast({ title: "Submission failed", description: err.message, variant: "destructive" });
-  } finally {
-    setIsSubmitting(false);
-  }
-};
-
-
-
+      // If you want to redirect in future: navigate(`/orders/${orderId}`);
+    } catch (err: any) {
+      toast({
+        title: "Submission failed",
+        description: err.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const handleBackToHome = () => {
     // Reset all state
@@ -289,108 +296,129 @@ const handleSubmit = async () => {
       await analyzeImage(selectedFile);
     }
   };
-const analyzeImage = async (selectedFile: File) => {
-  const reader = new FileReader();
-  reader.onload = async (event) => {
-    const imageData = event.target?.result as string;
-    setUploadedImage(imageData);
+  const analyzeImage = async (selectedFile: File) => {
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const imageData = event.target?.result as string;
+      setUploadedImage(imageData);
 
-    // setStep(4);
+      // setStep(4);
+      setIsGeneratingConcept(true);
+      setGenerationError(null);
+
+      try {
+        // Call /toy-preview
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/ai/toy-preview`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ imageData }), // <-- matches backend
+          },
+        );
+
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || "Preview failed");
+
+        setGeneratedConceptUrl(data.previewImage); // <-- matches backend response
+
+        toast({
+          title: "Preview ready",
+          description: "Toy preview generated!",
+        });
+
+        // Call story generation using the caption returned
+        generateToyStory(data.generatedCaption || "A cute toy"); // optional fallback
+      } catch (err: any) {
+        console.error("Toy preview error:", err);
+        setGenerationError(err.message);
+        toast({
+          title: "Error",
+          description: err.message,
+          variant: "destructive",
+        });
+      } finally {
+        setIsGeneratingConcept(false);
+      }
+    };
+
+    reader.readAsDataURL(selectedFile);
+  };
+
+  // Regenerate function
+  const handleRegenerateConcept = async () => {
+    if (!uploadedImage) return;
+
     setIsGeneratingConcept(true);
     setGenerationError(null);
 
     try {
-      // Call /toy-preview
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/ai/toy-preview`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ imageData }), // <-- matches backend
-        }
+          body: JSON.stringify({ imageData: uploadedImage }), // unified key
+        },
       );
 
+      if (!response.ok) {
+        const errorData = await response
+          .json()
+          .catch(() => ({ error: "Failed to generate toy preview." }));
+        throw new Error(errorData.error || "Failed to generate toy preview.");
+      }
+
       const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Preview failed");
+      setGeneratedConceptUrl(data.previewImage || null);
+      setDescription(data.generatedCaption || "");
 
-      setGeneratedConceptUrl(data.previewImage); // <-- matches backend response
-
-      toast({ title: "Preview ready", description: "Toy preview generated!" });
-
-      // Call story generation using the caption returned
-      generateToyStory(data.generatedCaption || "A cute toy"); // optional fallback
-    } catch (err: any) {
-      console.error("Toy preview error:", err);
-      setGenerationError(err.message);
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({
+        title: "Toy Preview Updated!",
+        description: "A new toy preview has been generated.",
+      });
+    } catch (error: any) {
+      console.error("Error re-generating toy preview:", error);
+      setGenerationError(error.message || "Failed to regenerate preview.");
+      toast({
+        title: "Generation Failed",
+        description: error.message || "Could not generate the toy.",
+        variant: "destructive",
+      });
     } finally {
       setIsGeneratingConcept(false);
     }
   };
 
-  reader.readAsDataURL(selectedFile);
-};
+  // Toy story function (unchanged)
+  const generateToyStory = async (description: string) => {
+    try {
+      setIsGeneratingStory(true);
 
-// Regenerate function
-const handleRegenerateConcept = async () => {
-  if (!uploadedImage) return;
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/ai/toy-story`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ description }),
+        },
+      );
 
-  setIsGeneratingConcept(true);
-  setGenerationError(null);
+      if (!response.ok) throw new Error("Failed to generate toy story");
 
-  try {
-    const response = await fetch(
-      `${import.meta.env.VITE_API_URL}/api/ai/toy-preview`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ imageData: uploadedImage }), // unified key
-      }
-    );
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ error: "Failed to generate toy preview." }));
-      throw new Error(errorData.error || "Failed to generate toy preview.");
+      const data = await response.json();
+      setToyName(data.name || "Your Special Toy");
+      setToyStory(
+        data.story || "This toy is waiting for its adventure to begin.",
+      );
+    } catch (err) {
+      console.error("Error generating toy story:", err);
+      setToyName("Your Special Toy");
+      setToyStory("This toy is waiting for its adventure to begin.");
+    } finally {
+      setIsGeneratingStory(false);
     }
-
-    const data = await response.json();
-    setGeneratedConceptUrl(data.previewImage || null);
-    setDescription(data.generatedCaption || "");
-
-    toast({ title: "Toy Preview Updated!", description: "A new toy preview has been generated." });
-  } catch (error: any) {
-    console.error("Error re-generating toy preview:", error);
-    setGenerationError(error.message || "Failed to regenerate preview.");
-    toast({ title: "Generation Failed", description: error.message || "Could not generate the toy.", variant: "destructive" });
-  } finally {
-    setIsGeneratingConcept(false);
-  }
-};
-
-// Toy story function (unchanged)
-const generateToyStory = async (description: string) => {
-  try {
-    setIsGeneratingStory(true);
-
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/ai/toy-story`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ description }),
-    });
-
-    if (!response.ok) throw new Error("Failed to generate toy story");
-
-    const data = await response.json();
-    setToyName(data.name || "Your Special Toy");
-    setToyStory(data.story || "This toy is waiting for its adventure to begin.");
-  } catch (err) {
-    console.error("Error generating toy story:", err);
-    setToyName("Your Special Toy");
-    setToyStory("This toy is waiting for its adventure to begin.");
-  } finally {
-    setIsGeneratingStory(false);
-  }
-};
+  };
 
   // const handleGetStarted = () => {
   //   setStep(3); // Navigate to Upload step (step 1 of 3)
@@ -440,187 +468,194 @@ const generateToyStory = async (description: string) => {
       // ref={containerRef}
     >
       {/* Navbar */}
-<nav className="fixed top-0 left-0 right-0 z-[100] bg-transparent">
-  <div className="max-w-7xl mx-auto px-4 md:px-8">
-    <div className="flex items-center justify-between h-14">
-      {/* Logo */}
-      <button
-        onClick={() => navigate('/')}
-        className="flex items-center gap-2 text-white hover:opacity-90 transition-opacity"
-      >
-       
-        <img 
-          src="/Logo.svg" 
-          alt="Toyify Logo" 
-          className="w-15 h-15 object-contain"
-        />
-      </button>
-
-      {/* Desktop Menu */}
-      <div className="hidden md:flex gap-8">
-        <button
-          onClick={() => setAboutOpen(true)}
-          className="text-white/90 hover:text-white text-sm font-medium transition-colors"
-        >
-          About
-        </button>
-        <button
-          onClick={() => setContactOpen(true)}
-          className="text-white/90 hover:text-white text-sm font-medium transition-colors"
-        >
-          Contact
-        </button>
-        <button
-          onClick={() => setPrivacyOpen(true)}
-          className="text-white/90 hover:text-white text-sm font-medium transition-colors"
-        >
-          Privacy
-        </button>
-        <button
-          onClick={() => setTermsOpen(true)}
-          className="text-white/90 hover:text-white text-sm font-medium transition-colors"
-        >
-          Terms
-        </button>
-      </div>
-
-      {/* Right Side - Cart & Auth */}
-      <div className="hidden md:flex items-center gap-3">
-        {/* Cart Icon */}
-        <button className="text-white/80 hover:text-white transition-colors p-2">
-          <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="9" cy="21" r="1"/>
-            <circle cx="20" cy="21" r="1"/>
-            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
-          </svg>
-        </button>
-
-        {user ? (
-          <div className="flex items-center gap-2">
-            <Button
-              onClick={() => setShowProfileDialog(true)}
-              variant="ghost"
-              className="text-white/90 hover:text-white hover:bg-white/10 gap-2 text-sm"
+      <nav className="fixed top-0 left-0 right-0 z-[100] bg-transparent">
+        <div className="max-w-7xl mx-auto px-4 md:px-8">
+          <div className="flex items-center justify-between h-14">
+            {/* Logo */}
+            <button
+              onClick={() => navigate("/")}
+              className="flex items-center gap-2 text-white hover:opacity-90 transition-opacity"
             >
-              <UserIcon className="w-4 h-4" />
-              Profile
-            </Button>
-            <Button
-              onClick={() => setShowLogoutDialog(true)}
-              variant="ghost"
-              className="text-white/90 hover:text-white hover:bg-white/10 gap-2 text-sm"
-            >
-              <LogOut className="w-4 h-4" />
-            </Button>
-          </div>
-        ) : (
-          <Button
-            onClick={() => navigate("/auth")}
-            className="bg-white text-purple-600 hover:bg-gray-100 rounded-lg px-5 py-2 text-sm font-medium shadow-sm"
-          >
-            Sign in
-          </Button>
-        )}
-      </div>
+              <img
+                src="/Logo.svg"
+                alt="Toyify Logo"
+                className="w-15 h-15 object-contain"
+              />
+            </button>
 
-      {/* Mobile Menu Button */}
-      <button
-        className="md:hidden text-white p-2"
-        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-      >
-        {mobileMenuOpen ? (
-          <X className="w-6 h-6" />
-        ) : (
-          <Menu className="w-6 h-6" />
-        )}
-      </button>
-    </div>
-  </div>
-
-  {/* Mobile Menu */}
-  {mobileMenuOpen && (
-    <div className="md:hidden bg-purple-600/95 backdrop-blur-sm border-t border-white/10 px-4 py-4">
-      <div className="flex flex-col gap-1">
-        <button
-          onClick={() => {
-            setAboutOpen(true);
-            setMobileMenuOpen(false);
-          }}
-          className="text-white/90 hover:text-white hover:bg-white/10 text-left py-3 px-3 text-sm font-medium rounded-lg transition-colors"
-        >
-          About
-        </button>
-        <button
-          onClick={() => {
-            setContactOpen(true);
-            setMobileMenuOpen(false);
-          }}
-          className="text-white/90 hover:text-white hover:bg-white/10 text-left py-3 px-3 text-sm font-medium rounded-lg transition-colors"
-        >
-          Contact
-        </button>
-        <button
-          onClick={() => {
-            setPrivacyOpen(true);
-            setMobileMenuOpen(false);
-          }}
-          className="text-white/90 hover:text-white hover:bg-white/10 text-left py-3 px-3 text-sm font-medium rounded-lg transition-colors"
-        >
-          Privacy
-        </button>
-        <button
-          onClick={() => {
-            setTermsOpen(true);
-            setMobileMenuOpen(false);
-          }}
-          className="text-white/90 hover:text-white hover:bg-white/10 text-left py-3 px-3 text-sm font-medium rounded-lg transition-colors"
-        >
-          Terms
-        </button>
-        
-        <div className="border-t border-white/20 mt-3 pt-3">
-          {user ? (
-            <div className="flex flex-col gap-1">
-              <Button
-                onClick={() => {
-                  setShowProfileDialog(true);
-                  setMobileMenuOpen(false);
-                }}
-                variant="ghost"
-                className="w-full justify-start text-white/90 hover:text-white hover:bg-white/10 gap-2"
+            {/* Desktop Menu */}
+            <div className="hidden md:flex gap-8">
+              <button
+                onClick={() => setAboutOpen(true)}
+                className="text-white/90 hover:text-white text-sm font-medium transition-colors"
               >
-                <UserIcon className="w-4 h-4" />
-                Profile
-              </Button>
-              <Button
-                onClick={() => {
-                  setShowLogoutDialog(true);
-                  setMobileMenuOpen(false);
-                }}
-                variant="ghost"
-                className="w-full justify-start text-white/90 hover:text-white hover:bg-white/10 gap-2"
+                About
+              </button>
+              <button
+                onClick={() => setContactOpen(true)}
+                className="text-white/90 hover:text-white text-sm font-medium transition-colors"
               >
-                <LogOut className="w-4 h-4" />
-                Logout
-              </Button>
+                Contact
+              </button>
+              <button
+                onClick={() => setPrivacyOpen(true)}
+                className="text-white/90 hover:text-white text-sm font-medium transition-colors"
+              >
+                Privacy
+              </button>
+              <button
+                onClick={() => setTermsOpen(true)}
+                className="text-white/90 hover:text-white text-sm font-medium transition-colors"
+              >
+                Terms
+              </button>
             </div>
-          ) : (
-            <Button
-              onClick={() => {
-                navigate("/auth");
-                setMobileMenuOpen(false);
-              }}
-              className="w-full bg-white text-purple-600 hover:bg-gray-100 gap-2 mt-2"
+
+            {/* Right Side - Cart & Auth */}
+            <div className="hidden md:flex items-center gap-3">
+              {/* Cart Icon */}
+              <button className="text-white/80 hover:text-white transition-colors p-2">
+                <svg
+                  viewBox="0 0 24 24"
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <circle cx="9" cy="21" r="1" />
+                  <circle cx="20" cy="21" r="1" />
+                  <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+                </svg>
+              </button>
+
+              {user ? (
+                <div className="flex items-center gap-2">
+                  <Button
+                    onClick={() => setShowProfileDialog(true)}
+                    variant="ghost"
+                    className="text-white/90 hover:text-white hover:bg-white/10 gap-2 text-sm"
+                  >
+                    <UserIcon className="w-4 h-4" />
+                    Profile
+                  </Button>
+                  <Button
+                    onClick={() => setShowLogoutDialog(true)}
+                    variant="ghost"
+                    className="text-white/90 hover:text-white hover:bg-white/10 gap-2 text-sm"
+                  >
+                    <LogOut className="w-4 h-4" />
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  onClick={() => navigate("/auth")}
+                  className="bg-white text-purple-600 hover:bg-gray-100 rounded-lg px-5 py-2 text-sm font-medium shadow-sm"
+                >
+                  Sign in
+                </Button>
+              )}
+            </div>
+
+            {/* Mobile Menu Button */}
+            <button
+              className="md:hidden text-white p-2"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
-              <LogIn className="w-4 h-4" />
-              Sign in
-            </Button>
-          )}
+              {mobileMenuOpen ? (
+                <X className="w-6 h-6" />
+              ) : (
+                <Menu className="w-6 h-6" />
+              )}
+            </button>
+          </div>
         </div>
-      </div>
-    </div>
-  )}
-</nav>
+
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden bg-purple-600/95 backdrop-blur-sm border-t border-white/10 px-4 py-4">
+            <div className="flex flex-col gap-1">
+              <button
+                onClick={() => {
+                  setAboutOpen(true);
+                  setMobileMenuOpen(false);
+                }}
+                className="text-white/90 hover:text-white hover:bg-white/10 text-left py-3 px-3 text-sm font-medium rounded-lg transition-colors"
+              >
+                About
+              </button>
+              <button
+                onClick={() => {
+                  setContactOpen(true);
+                  setMobileMenuOpen(false);
+                }}
+                className="text-white/90 hover:text-white hover:bg-white/10 text-left py-3 px-3 text-sm font-medium rounded-lg transition-colors"
+              >
+                Contact
+              </button>
+              <button
+                onClick={() => {
+                  setPrivacyOpen(true);
+                  setMobileMenuOpen(false);
+                }}
+                className="text-white/90 hover:text-white hover:bg-white/10 text-left py-3 px-3 text-sm font-medium rounded-lg transition-colors"
+              >
+                Privacy
+              </button>
+              <button
+                onClick={() => {
+                  setTermsOpen(true);
+                  setMobileMenuOpen(false);
+                }}
+                className="text-white/90 hover:text-white hover:bg-white/10 text-left py-3 px-3 text-sm font-medium rounded-lg transition-colors"
+              >
+                Terms
+              </button>
+
+              <div className="border-t border-white/20 mt-3 pt-3">
+                {user ? (
+                  <div className="flex flex-col gap-1">
+                    <Button
+                      onClick={() => {
+                        setShowProfileDialog(true);
+                        setMobileMenuOpen(false);
+                      }}
+                      variant="ghost"
+                      className="w-full justify-start text-white/90 hover:text-white hover:bg-white/10 gap-2"
+                    >
+                      <UserIcon className="w-4 h-4" />
+                      Profile
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        setShowLogoutDialog(true);
+                        setMobileMenuOpen(false);
+                      }}
+                      variant="ghost"
+                      className="w-full justify-start text-white/90 hover:text-white hover:bg-white/10 gap-2"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Logout
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    onClick={() => {
+                      navigate("/auth");
+                      setMobileMenuOpen(false);
+                    }}
+                    className="w-full bg-white text-purple-600 hover:bg-gray-100 gap-2 mt-2"
+                  >
+                    <LogIn className="w-4 h-4" />
+                    Sign in
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </nav>
 
       {/* Profile Dialog */}
       <ProfileDialog
@@ -645,8 +680,6 @@ const generateToyStory = async (description: string) => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-   
 
       {/* Footer Space - Reserved for copyright */}
       <div className="fixed bottom-2 left-8 right-8 z-[60] h-6 md:h-10 flex items-center justify-center pointer-events-auto">
@@ -705,8 +738,6 @@ const generateToyStory = async (description: string) => {
           </div>
         </DialogContent>
       </Dialog>
-
-     
     </div>
   );
 };

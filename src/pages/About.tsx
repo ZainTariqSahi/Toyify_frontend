@@ -3,9 +3,9 @@
 export default function About() {
   return (
     <div className="p-8 max-w-3xl mx-auto">
-      <h1 className="text-3xl font-bold mb-4">About BuzzyMuzzy</h1>
+      <h1 className="text-3xl font-bold mb-4">About Toyify</h1>
       <p className="text-muted-foreground mb-6">
-        BuzzyMuzzy is a platform that transforms any drawing into a custom toy.
+        Toyify is a platform that transforms any drawing into a custom toy.
         We bring your imagination to life with our innovative 3D printing
         technology and expert craftsmanship.
       </p>

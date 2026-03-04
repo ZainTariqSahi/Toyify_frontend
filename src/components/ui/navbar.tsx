@@ -108,14 +108,14 @@ export default function Navbar({
                 <Button
                   onClick={onOpenProfile}
                   variant="ghost"
-                  className="nav-auth-btn text-white hover:text-white/80"
+                  className="nav-auth-btn text-white hover:text-purple-600 transition-colors"
                 >
                   <UserIcon className="w-4 h-4" /> Hi, {getUsername()}
                 </Button>
                 <Button
                   onClick={logout}
                   variant="ghost"
-                  className="nav-auth-btn text-white hover:text-white/80"
+                  className="nav-auth-btn text-white hover:text-purple-600 transition-colors"
                 >
                   <LogOut className="w-4 h-4" />
                 </Button>
@@ -187,7 +187,7 @@ export default function Navbar({
                 </Button>
               ) : (
                 <>
-                  <div className="text-white text-sm font-medium px-4 py-2 mb-2">
+                  <div className="text-white hover:text-purple-400 transition-colors text-sm font-medium px-4 py-2 mb-2">
                     Hi, {getUsername()}
                   </div>
                   <Button

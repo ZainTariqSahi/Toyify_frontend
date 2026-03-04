@@ -16,7 +16,7 @@ const ToyProductPage: React.FC = () => {
   ]);
 
   const { toast } = useToast();
-  const navigate=useNavigate()
+  const navigate = useNavigate();
   // Load uploaded image from sessionStorage on component mount
   useEffect(() => {
     const uploadedImage = sessionStorage.getItem("uploadedImage");
@@ -29,8 +29,8 @@ const ToyProductPage: React.FC = () => {
       prev.map((img) =>
         img.type === "original"
           ? { ...img, preview: uploadedImage, file: null }
-          : img
-      )
+          : img,
+      ),
     );
 
     // Automatically call the backend to generate AI preview
@@ -45,7 +45,7 @@ const ToyProductPage: React.FC = () => {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ imageData: uploadedImage }),
-          }
+          },
         );
 
         const data = await response.json();
@@ -79,7 +79,7 @@ const ToyProductPage: React.FC = () => {
 
   const handleImageUpload = async (
     id: number,
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -94,8 +94,8 @@ const ToyProductPage: React.FC = () => {
       // 1️⃣ Set local preview
       setImages((prev) =>
         prev.map((img) =>
-          img.id === id ? { ...img, file, preview: imageData } : img
-        )
+          img.id === id ? { ...img, file, preview: imageData } : img,
+        ),
       );
       setUploadedImage(imageData);
 
@@ -107,7 +107,7 @@ const ToyProductPage: React.FC = () => {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ imageData }),
-        }
+        },
       );
 
       console.log("Fetch response status:", response.status);
@@ -150,62 +150,67 @@ const ToyProductPage: React.FC = () => {
     window.location.href = "/";
   };
 
-// ToyProductPage.tsx
-const handleAddToCart = async () => {
-  const storedUser = localStorage.getItem("user");
-  const token = localStorage.getItem("token");
+  // ToyProductPage.tsx
+  const handleAddToCart = async () => {
+    const storedUser = localStorage.getItem("user");
+    const token = localStorage.getItem("token");
 
-  if (!storedUser || !token) {
-    sessionStorage.setItem("postLoginRedirect", "/cart");
-    toast({
-      title: "Login required",
-      description: "Please log in to add items to your cart",
-      variant: "destructive",
-    });
-    navigate("/auth");
-    return;
-  }
+    if (!storedUser || !token) {
+      sessionStorage.setItem("postLoginRedirect", "/cart");
+      toast({
+        title: "Login required",
+        description: "Please log in to add items to your cart",
+        variant: "destructive",
+      });
+      navigate("/auth");
+      return;
+    }
 
-  const uploadedImageName = sessionStorage.getItem("uploadedImageName") || "drawing.jpg";
+    const uploadedImageName =
+      sessionStorage.getItem("uploadedImageName") || "drawing.jpg";
 
-  const cartItem = {
-    orderName: `${title} ${uploadedImageName}`,
-    referenceImage: images.find((img) => img.id === selectedImage)?.type || "original",
-    price: selectedPrice,
-    type: selectedPrice === 39 ? "Fully crafted toy" : "DIY toy",
-    quantity: 1,
-    fileName: uploadedImageName,
-    imageVersion: images.find((img) => img.id === selectedImage)?.type || "original",
-    size: 30,
-    description: toyStory,
+    const cartItem = {
+      orderName: `${title} ${uploadedImageName}`,
+      referenceImage:
+        images.find((img) => img.id === selectedImage)?.type || "original",
+      price: selectedPrice,
+      type: selectedPrice === 39 ? "Fully crafted toy" : "DIY toy",
+      quantity: 1,
+      fileName: uploadedImageName,
+      imageVersion:
+        images.find((img) => img.id === selectedImage)?.type || "original",
+      size: 30,
+      description: toyStory,
+    };
+
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/cart/add`, {
+        // ✅ endpoint fix
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // ✅ send token
+        },
+        body: JSON.stringify({ item: cartItem }),
+      });
+
+      if (!res.ok)
+        throw new Error((await res.json()).message || "Failed to add to cart");
+
+      toast({
+        title: "Added to cart",
+        description: "Check your cart for details",
+      });
+
+      navigate("/cart");
+    } catch (err: any) {
+      toast({
+        title: "Error",
+        description: err.message,
+        variant: "destructive",
+      });
+    }
   };
-
-  try {
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/cart/add`, { // ✅ endpoint fix
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`, // ✅ send token
-      },
-      body: JSON.stringify({ item: cartItem }),
-    });
-
-    if (!res.ok) throw new Error((await res.json()).message || "Failed to add to cart");
-
-    toast({
-      title: "Added to cart",
-      description: "Check your cart for details",
-    });
-
-    navigate("/cart");
-  } catch (err: any) {
-    toast({ title: "Error", description: err.message, variant: "destructive" });
-  }
-};
-
-
-
-
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -233,7 +238,7 @@ const handleAddToCart = async () => {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ imageData }), // <-- matches backend
-          }
+          },
         );
 
         const data = await response.json();
@@ -275,7 +280,7 @@ const handleAddToCart = async () => {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ description }),
-        }
+        },
       );
 
       if (!response.ok) throw new Error("Failed to generate toy story");
@@ -283,7 +288,7 @@ const handleAddToCart = async () => {
       const data = await response.json();
       setToyName(data.name || "Your Special Toy");
       setToyStory(
-        data.story || "This toy is waiting for its adventure to begin."
+        data.story || "This toy is waiting for its adventure to begin.",
       );
     } catch (err) {
       console.error("Error generating toy story:", err);
@@ -303,7 +308,7 @@ const handleAddToCart = async () => {
   const [selectedPrice, setSelectedPrice] = useState<number>(39); // default £39
   const [selectedImage, setSelectedImage] = useState<number | null>(1);
   const [generatedConceptUrl, setGeneratedConceptUrl] = useState<string | null>(
-    null
+    null,
   );
   const [isGeneratingConcept, setIsGeneratingConcept] = useState(false);
   const [generationError, setGenerationError] = useState<string | null>(null);
@@ -323,8 +328,8 @@ const handleAddToCart = async () => {
               preview: generatedConceptUrl,
               file: null,
             }
-          : img
-      )
+          : img,
+      ),
     );
   }, [generatedConceptUrl]);
 
@@ -414,11 +419,33 @@ const handleAddToCart = async () => {
 
                   {image.type === "generated" ? (
                     isGeneratingConcept ? (
-                      // ✅ Show skeleton while AI image is generating
-                      <div className="w-full h-full flex items-center justify-center">
-                        <div className="w-full h-full animate-pulse bg-purple-100 rounded-2xl flex items-center justify-center">
-                          <p className="text-xs text-purple-400">
-                            Generating AI image…
+                      <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl relative overflow-hidden">
+                        {/* shimmer animation */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-pulse"></div>
+
+                        <div className="flex flex-col items-center gap-3 z-10">
+                          <svg
+                            className="w-8 h-8 text-purple-600 animate-spin"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            ></circle>
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8v8H4z"
+                            ></path>
+                          </svg>
+
+                          <p className="text-xs font-medium text-purple-600">
+                            Creating your toy magic...
                           </p>
                         </div>
                       </div>
@@ -531,8 +558,6 @@ const handleAddToCart = async () => {
                 onChange={() => setSelectedPrice(39)}
                 className="w-5 h-5 text-purple-600 border-2 border-gray-300 rounded focus:ring-purple-500 cursor-pointer"
               />
-
-              
             </div>
 
             <div className="text-5xl font-bold text-gray-900 mb-1 mt-6">
@@ -589,7 +614,6 @@ const handleAddToCart = async () => {
                 onChange={() => setSelectedPrice(29)}
                 className="w-5 h-5 text-purple-600 border-2 border-gray-300 rounded focus:ring-purple-500 cursor-pointer"
               />
-              
             </div>
 
             <div className="text-5xl font-bold text-gray-900 mb-1 mt-6">
