@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Trash2, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 interface CartItem {
-  _id: string;           // backend ID
-  id: string;            // UI convenience ID
+  _id: string; // backend ID
+  id: string; // UI convenience ID
   fileName: string;
   imageVersion: "generated" | "original";
   size: number;
@@ -17,8 +17,9 @@ const ShoppingCart: React.FC = () => {
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [loading, setLoading] = useState(false);
+  
 
-  const navigate=useNavigate()
+  const navigate = useNavigate();
   const token = localStorage.getItem("token");
 
   // Fetch cart items from backend
@@ -56,7 +57,7 @@ const ShoppingCart: React.FC = () => {
 
   const subtotal = cartItems.reduce(
     (sum, item) => sum + (item.price ?? 0) * item.quantity,
-    0
+    0,
   );
   const shipping = 0;
   const total = subtotal + shipping;
@@ -102,13 +103,13 @@ const ShoppingCart: React.FC = () => {
   };
 
   // Checkout
-  
+
   const handleCheckout = () => {
     if (!termsAccepted || cartItems.length === 0) return;
 
     // Pass only selected items
     const selectedCartItems = cartItems.filter((item) =>
-      selectedItems.has(item.id)
+      selectedItems.has(item.id),
     );
 
     // Navigate to checkout page with state
@@ -137,6 +138,53 @@ const ShoppingCart: React.FC = () => {
         ) : (
           <>
             {/* Cart table */}
+
+            {/* Mobile Cart */}
+            <div className="md:hidden space-y-4 mb-6">
+              {cartItems.map((item) => (
+                <div
+                  key={item.id}
+                  className="bg-white rounded-lg shadow-sm p-4 flex flex-col gap-3"
+                >
+                  <div className="flex justify-between items-start">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={selectedItems.has(item.id)}
+                        onChange={() => toggleSelectItem(item.id)}
+                        className="w-4 h-4 text-indigo-600 rounded border-gray-300"
+                      />
+                      <p className="font-medium text-gray-900">
+                        {item.fileName}
+                      </p>
+                    </div>
+
+                    <button
+                      onClick={() => removeItem(item.id)}
+                      className="text-gray-400 hover:text-red-500"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  <div className="text-sm text-gray-600">
+                    Version: {item.imageVersion}
+                  </div>
+
+                  <div className="flex justify-between text-sm">
+                    <span>Price:</span>
+                    <span className="font-medium">
+                      £{(item.price ?? 0).toFixed(2)}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between text-sm">
+                    <span>Quantity:</span>
+                    <span>{item.quantity}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
             <div className="hidden md:block bg-white rounded-lg shadow-sm overflow-hidden mb-6">
               <div className="grid grid-cols-12 gap-4 p-4 bg-[#F9F5FF] border-b text-sm font-medium text-[#667085]">
                 <div className="col-span-1">
@@ -222,13 +270,13 @@ const ShoppingCart: React.FC = () => {
 
             {/* Totals */}
             <div className="mt-6 text-right">
-              <p className="text-gray-700">
-                Subtotal: £{subtotal.toFixed(2)}
-              </p>
+              <p className="text-gray-700">Subtotal: £{subtotal.toFixed(2)}</p>
               <p className="text-gray-700">
                 Shipping: {shipping === 0 ? "Free" : `£${shipping.toFixed(2)}`}
               </p>
-              <p className="font-bold text-gray-900">Total: £{total.toFixed(2)}</p>
+              <p className="font-bold text-gray-900">
+                Total: £{total.toFixed(2)}
+              </p>
             </div>
           </>
         )}

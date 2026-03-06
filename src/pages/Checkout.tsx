@@ -154,6 +154,7 @@ const BillingDetails: React.FC = () => {
     const location = useLocation();
   const navigate = useNavigate();
   const cartItems = location.state?.cartItems || [];
+  const [checkingOut, setCheckingOut] = useState(false);
 
    const subtotal = cartItems.reduce(
     (sum, item) => sum + (item.price ?? 0) * item.quantity,
@@ -174,9 +175,12 @@ const BillingDetails: React.FC = () => {
   };
 
 const handleCheckout = async () => {
+  if (checkingOut) return; // prevent double click
   if (!termsAccepted || cartItems.length === 0) return;
 
   try {
+    setCheckingOut(true);
+
     const token = localStorage.getItem("token");
     const res = await fetch(`${import.meta.env.VITE_API_URL}/api/orders`, {
       method: "POST",
@@ -185,7 +189,7 @@ const handleCheckout = async () => {
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
-        customerEmail: formData.email, // <-- send customerEmail!
+        customerEmail: formData.email,
         items: cartItems.map((item) => ({
           fileName: item.fileName,
           imageVersion: item.imageVersion,
@@ -197,18 +201,19 @@ const handleCheckout = async () => {
       }),
     });
 
-    if (!res.ok) {
-      const errData = await res.json();
-      throw new Error(errData.message || "Checkout failed");
-    }
-
     const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data?.message || "Checkout failed");
+    }
 
     alert("Check your email! Your order has been placed.");
     window.location.href = "/";
-  } catch (err) {
+  } catch (err: any) {
     console.error("Checkout error:", err);
-    alert(err.message || "Failed to place order");
+    alert(err?.message || "Failed to place order");
+  } finally {
+    setCheckingOut(false);
   }
 };
 
@@ -401,13 +406,21 @@ const handleCheckout = async () => {
           
           <div className="lg:col-span-1">
             <button
-              onClick={handleCheckout}
-              disabled={!termsAccepted}
-              className="px-8 py-2.5 bg-[#7F56D9] text-white font-medium rounded-md hover:bg-[#6941C6] transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2 ml-auto"
-              >
-                Checkout
-                <ArrowRight className="w-5 h-5" />
-            </button>
+  onClick={handleCheckout}
+  disabled={!termsAccepted || checkingOut}
+  className="px-8 py-2.5 bg-[#7F56D9] text-white font-medium rounded-md hover:bg-[#6941C6] transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2 ml-auto"
+>
+  {checkingOut ? (
+    <>
+      <span className="inline-block w-4 h-4 rounded-full border-2 border-white/60 border-t-white animate-spin" />
+      Processing...
+    </>
+  ) : (
+    <>
+      Checkout <ArrowRight className="w-5 h-5" />
+    </>
+  )}
+</button>
           </div>
         </div>
 
