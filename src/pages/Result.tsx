@@ -20,11 +20,11 @@ const ToyProductPage: React.FC = () => {
   // Load uploaded image from sessionStorage on component mount
   useEffect(() => {
     const uploadedImage = sessionStorage.getItem("uploadedImage");
-    const uploadedImageName = sessionStorage.getItem("uploadedImageName");
 
     if (!uploadedImage) return;
 
-    // Update the original image preview
+    setUploadedImage(uploadedImage);
+
     setImages((prev) =>
       prev.map((img) =>
         img.type === "original"
@@ -33,40 +33,37 @@ const ToyProductPage: React.FC = () => {
       ),
     );
 
-    // Automatically call the backend to generate AI preview
-    const generatePreview = async () => {
-      try {
-        setIsGeneratingConcept(true);
-        setGenerationError(null);
-
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/ai/toy-preview`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ imageData: uploadedImage }),
-          },
-        );
-
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.message || "Preview failed");
-
-        console.log("AI preview response:", data);
-
-        setGeneratedConceptUrl(data.previewImage);
-
-        // Call toy story generation if needed
-        generateToyStory(data.generatedCaption || "A cute toy");
-      } catch (err: any) {
-        console.error("Toy preview error:", err);
-        setGenerationError(err.message);
-      } finally {
-        setIsGeneratingConcept(false);
-      }
-    };
-
-    generatePreview();
+    generatePreviewFromImageData(uploadedImage);
   }, []);
+
+  const generatePreviewFromImageData = async (imageData: string) => {
+    try {
+      setIsGeneratingConcept(true);
+      setGenerationError(null);
+
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/ai/toy-preview`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ imageData }),
+        },
+      );
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Preview failed");
+
+      setGeneratedConceptUrl(data.previewImage);
+      if (imageData) {
+        generateToyStory(imageData, data.generatedCaption || "A cute toy");
+      }
+    } catch (err: any) {
+      console.error("Toy preview error:", err);
+      setGenerationError(err.message);
+    } finally {
+      setIsGeneratingConcept(false);
+    }
+  };
 
   const readFileAsDataURL = (file: File) => {
     return new Promise<string>((resolve, reject) => {
@@ -85,44 +82,23 @@ const ToyProductPage: React.FC = () => {
     if (!file) return;
 
     try {
-      setIsGeneratingConcept(true);
-      setGenerationError(null);
-
-      // ✅ Properly await the file read
       const imageData = await readFileAsDataURL(file);
 
-      // 1️⃣ Set local preview
+      setFile(file);
+      setUploadedImage(imageData);
+
       setImages((prev) =>
         prev.map((img) =>
           img.id === id ? { ...img, file, preview: imageData } : img,
         ),
       );
-      setUploadedImage(imageData);
 
-      // 2️⃣ Call AI preview API
-      console.log("Calling backend with imageData size:", imageData.length);
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/ai/toy-preview`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ imageData }),
-        },
-      );
-
-      console.log("Fetch response status:", response.status);
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Preview failed");
-
-      console.log("AI preview response:", data);
-      setGeneratedConceptUrl(data.previewImage);
+      await generatePreviewFromImageData(imageData);
 
       toast({
         title: "Preview ready",
         description: "Toy preview generated!",
       });
-
-      generateToyStory(data.generatedCaption || "A cute toy");
     } catch (err: any) {
       console.error("Toy preview error:", err);
       setGenerationError(err.message);
@@ -131,8 +107,6 @@ const ToyProductPage: React.FC = () => {
         description: err.message,
         variant: "destructive",
       });
-    } finally {
-      setIsGeneratingConcept(false);
     }
   };
 
@@ -270,7 +244,7 @@ const ToyProductPage: React.FC = () => {
     reader.readAsDataURL(selectedFile);
   };
 
-  const generateToyStory = async (description: string) => {
+  const generateToyStory = async (imageData: string, description?: string) => {
     try {
       setIsGeneratingStory(true);
 
@@ -279,7 +253,10 @@ const ToyProductPage: React.FC = () => {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ description }),
+          body: JSON.stringify({
+            imageData,
+            description,
+          }),
         },
       );
 
@@ -316,6 +293,8 @@ const ToyProductPage: React.FC = () => {
   const [toyStory, setToyStory] = useState("");
   const [isGeneratingStory, setIsGeneratingStory] = useState(false);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
+  const canAddToCart =
+    generatedConceptUrl && !isGeneratingConcept && !generationError;
 
   useEffect(() => {
     if (!generatedConceptUrl) return;
@@ -457,13 +436,8 @@ const ToyProductPage: React.FC = () => {
                         </p>
                         <button
                           onClick={() => {
-                            setGenerationError(null);
-                            if (uploadedImage) {
-                              // retry AI generation
-                              handleImageUpload(image.id, {
-                                target: { files: [file] },
-                              } as any);
-                            }
+                            if (!uploadedImage) return;
+                            generatePreviewFromImageData(uploadedImage);
                           }}
                           className="text-xs text-purple-600 underline"
                         >
@@ -527,14 +501,14 @@ const ToyProductPage: React.FC = () => {
               Toy's Story
             </h2>
             <div className="border-2 border-[#D5D7DA] p-4 rounded-2xl">
+              <h1 className="text-2xl md:text-3xl font-bold text-[#42307D]">
+                {toyName || title}
+              </h1>
               <p className="text-sm text-[#717680] leading-relaxed">
-                Buzzy was not just any cat toy; he was Buzzy the Cutie Cat, and
-                his favorite thing in the whole wide world was the bright,
-                rainbow-colored sparkle that came from the sun when it hit his
-                shiny plastic nose. One Tuesday morning, Buzzy woke up on the
-                edge of the dresser, stretched his little felt arms, and looked
-                out the window for his morning dose of shine. But something was
-                wrong.
+                {isGeneratingStory
+                  ? "Generating your toy story..."
+                  : toyStory ||
+                    "This toy is waiting for its adventure to begin."}
               </p>
             </div>
           </div>
@@ -679,7 +653,13 @@ const ToyProductPage: React.FC = () => {
 
         <button
           onClick={handleAddToCart}
-          className="w-full sm:w-auto px-8 py-3 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+          disabled={!canAddToCart}
+          className={`w-full sm:w-auto px-8 py-3 text-white font-medium rounded-lg transition shadow-md flex items-center justify-center gap-2
+    ${
+      canAddToCart
+        ? "bg-purple-600 hover:bg-purple-700 hover:shadow-lg"
+        : "bg-gray-400 cursor-not-allowed"
+    }`}
         >
           <span>Add to cart</span>
           <span>→</span>
